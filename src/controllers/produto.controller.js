@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma");
-const fetch = require("node-fetch"); // 🔥 IMPORTANTE
+const fetch = require("node-fetch");
 
-// 🔗 comunicação com estoque (AGORA NA PORTA 3003)
+// 🔗 estoque (porta 3003)
 async function getEstoqueByProdutoID(produtoId) {
   try {
     const response = await fetch(`http://localhost:3003/estoque/${produtoId}`);
@@ -16,7 +16,7 @@ async function getEstoqueByProdutoID(produtoId) {
   }
 }
 
-// GET /produtos
+// GET TODOS
 async function getProdutos(req, res, next) {
   try {
     const produtos = await prisma.produto.findMany();
@@ -27,7 +27,7 @@ async function getProdutos(req, res, next) {
   }
 }
 
-// GET /produtos/:id
+// GET POR ID + ESTOQUE
 async function getProdutoByID(req, res, next) {
   try {
     const { id } = req.params;
@@ -41,27 +41,28 @@ async function getProdutoByID(req, res, next) {
       return next();
     }
 
-    // 🔥 CHAMANDO O ESTOQUE
     const estoque = await getEstoqueByProdutoID(id);
 
-    res.send({
-      produto,
-      estoque
-    });
-
+    res.send({ produto, estoque });
     next();
   } catch (error) {
     res.send(500, { error: "Erro ao buscar produto" });
   }
 }
 
-// POST /produtos
+// POST
 async function createProduto(req, res, next) {
   try {
-    const { nome, preco, descricao, status } = req.body;
+    const {
+      nome, preco, descricao, status,
+      categoria, marca, tamanho, genero
+    } = req.body;
 
     const produto = await prisma.produto.create({
-      data: { nome, preco, descricao, status }
+      data: {
+        nome, preco, descricao, status,
+        categoria, marca, tamanho, genero
+      }
     });
 
     res.send(201, produto);
@@ -71,7 +72,7 @@ async function createProduto(req, res, next) {
   }
 }
 
-// PATCH /produtos/:id
+// PATCH
 async function patchProduto(req, res, next) {
   try {
     const { id } = req.params;
@@ -88,7 +89,7 @@ async function patchProduto(req, res, next) {
   }
 }
 
-// DELETE /produtos/:id
+// DELETE (soft delete)
 async function deleteProdutoById(req, res, next) {
   try {
     const { id } = req.params;
@@ -105,10 +106,75 @@ async function deleteProdutoById(req, res, next) {
   }
 }
 
+// 🔍 FILTROS
+
+async function getByCategoria(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { categoria: req.params.categoria }
+  });
+  res.send(produtos);
+  next();
+}
+
+async function getByName(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { nome: { contains: req.params.nome } }
+  });
+  res.send(produtos);
+  next();
+}
+
+async function getByPrice(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { preco: Number(req.params.preco) }
+  });
+  res.send(produtos);
+  next();
+}
+
+async function getByPostDate(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { createdAt: new Date(req.params.data) }
+  });
+  res.send(produtos);
+  next();
+}
+
+async function getByTam(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { tamanho: req.params.tamanho }
+  });
+  res.send(produtos);
+  next();
+}
+
+async function getByGender(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { genero: req.params.genero }
+  });
+  res.send(produtos);
+  next();
+}
+
+async function getByBrand(req, res, next) {
+  const produtos = await prisma.produto.findMany({
+    where: { marca: req.params.marca }
+  });
+  res.send(produtos);
+  next();
+}
+
 module.exports = {
   getProdutos,
   getProdutoByID,
   createProduto,
   patchProduto,
-  deleteProdutoById
+  deleteProdutoById,
+  getByCategoria,
+  getByName,
+  getByPrice,
+  getByPostDate,
+  getByTam,
+  getByGender,
+  getByBrand
 };
