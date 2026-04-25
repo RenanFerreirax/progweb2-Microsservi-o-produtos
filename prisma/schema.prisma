@@ -1,33 +1,15 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-
-model Usuario { 
-  id        Int      @id @default(autoincrement()) 
-  nome      String   @db.VarChar(120) 
-  email     String   @unique @db.VarChar(120) 
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt 
-}
-
 model Produto {
-  id         Int      @id @default(autoincrement())
-  nome       String   @db.VarChar(120)
-  preco      Float
-  descricao  String?  @db.VarChar(255)
+  id        Int      @id @default(autoincrement())
+  nome      String   @db.VarChar(120)
+  preco     Float
+  descricao String?  @db.VarChar(255)
 
-  // 🔥 CAMPOS NOVOS
-  categoria  String?  @db.VarChar(100)
-  marca      String?  @db.VarChar(100)
-  tamanho    String?  @db.VarChar(50)
-  genero     String?  @db.VarChar(50)
+  categoria String?  @db.VarChar(100)
+  marca     String?  @db.VarChar(100)
+  tamanho   String?  @db.VarChar(50)
+  genero    String?  @db.VarChar(50)
 
-  status     Int      @default(1)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status    Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
