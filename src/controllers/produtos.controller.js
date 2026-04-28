@@ -1,10 +1,10 @@
 const prisma = require("../config/prisma");
-const fetch = require("node-fetch");
+
 
 // 🔗 INTEGRAÇÃO COM ESTOQUE
 async function getEstoqueByProdutoID(produtoId) {
   try {
-    const response = await fetch(`http://localhost:3003/estoque/${produtoId}`);
+    const response = await fetch(`http://localhost:3003/estoques/${produtoId}`);
 
     if (!response.ok) {
       return { mensagem: "Estoque não encontrado" };
