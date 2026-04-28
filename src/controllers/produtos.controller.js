@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma");
 const fetch = require("node-fetch");
 
-// 🔗 comunicação com estoque (porta 3003)
+// 🔗 INTEGRAÇÃO COM ESTOQUE
 async function getEstoqueByProdutoID(produtoId) {
   try {
     const response = await fetch(`http://localhost:3003/estoque/${produtoId}`);
@@ -16,10 +16,13 @@ async function getEstoqueByProdutoID(produtoId) {
   }
 }
 
-// ✅ GET TODOS
+// ✅ GET TODOS (SÓ ATIVOS)
 async function getProdutos(req, res) {
   try {
-    const produtos = await prisma.produto.findMany();
+    const produtos = await prisma.produto.findMany({
+      where: { status: 1 }
+    });
+
     res.send(produtos);
   } catch (error) {
     console.log(error);
@@ -32,8 +35,11 @@ async function getProdutoByID(req, res) {
   try {
     const { id } = req.params;
 
-    const produto = await prisma.produto.findUnique({
-      where: { id: Number(id) }
+    const produto = await prisma.produto.findFirst({
+      where: {
+        id: Number(id),
+        status: 1
+      }
     });
 
     if (!produto) {
@@ -52,6 +58,10 @@ async function getProdutoByID(req, res) {
 // ✅ CREATE
 async function createProduto(req, res) {
   try {
+    if (!req.body || !req.body.nome || !req.body.preco) {
+      return res.send(400, { error: "nome e preco são obrigatórios" });
+    }
+
     const {
       nome,
       preco,
@@ -81,7 +91,7 @@ async function createProduto(req, res) {
   }
 }
 
-// ✅ UPDATE
+// ✅ UPDATE (PATCH)
 async function patchProduto(req, res) {
   try {
     const { id } = req.params;
@@ -98,7 +108,7 @@ async function patchProduto(req, res) {
   }
 }
 
-// ✅ DELETE (soft delete)
+// ✅ DELETE (SOFT DELETE)
 async function deleteProdutoById(req, res) {
   try {
     const { id } = req.params;
@@ -115,12 +125,15 @@ async function deleteProdutoById(req, res) {
   }
 }
 
-// 🔍 FILTROS
+// 🔍 FILTROS (SÓ ATIVOS)
 
 async function getByCategoria(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { categoria: req.params.categoria }
+      where: {
+        categoria: req.params.categoria,
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
@@ -132,7 +145,10 @@ async function getByCategoria(req, res) {
 async function getByName(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { nome: { contains: req.params.nome } }
+      where: {
+        nome: { contains: req.params.nome },
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
@@ -144,7 +160,10 @@ async function getByName(req, res) {
 async function getByPrice(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { preco: Number(req.params.preco) }
+      where: {
+        preco: Number(req.params.preco),
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
@@ -156,7 +175,10 @@ async function getByPrice(req, res) {
 async function getByPostDate(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { createdAt: new Date(req.params.data) }
+      where: {
+        createdAt: new Date(req.params.data),
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
@@ -168,7 +190,10 @@ async function getByPostDate(req, res) {
 async function getByTam(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { tamanho: req.params.tamanho }
+      where: {
+        tamanho: req.params.tamanho,
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
@@ -180,7 +205,10 @@ async function getByTam(req, res) {
 async function getByGender(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { genero: req.params.genero }
+      where: {
+        genero: req.params.genero,
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
@@ -192,7 +220,10 @@ async function getByGender(req, res) {
 async function getByBrand(req, res) {
   try {
     const produtos = await prisma.produto.findMany({
-      where: { marca: req.params.marca }
+      where: {
+        marca: req.params.marca,
+        status: 1
+      }
     });
     res.send(produtos);
   } catch (error) {
